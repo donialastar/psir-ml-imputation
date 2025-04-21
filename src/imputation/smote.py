@@ -1,27 +1,30 @@
+from imblearn.over_sampling import SMOTE
 import pandas as pd
-from sklearn.experimental import enable_iterative_imputer
-from sklearn.impute import IterativeImputer
 from pathlib import Path
 
-def mice_impute(input_path, output_path, max_iter=10, random_state=42):
+def apply_smote(dataset_name):
     """
-    Imputation MICE avec sauvegarde des résultats
-    
+    Applique SMOTE uniquement sur le train déjà imputé
     Args:
-        input_path: Chemin vers le fichier CSV brut
-        output_path: Chemin de sauvegarde
-        max_iter: Nombre d'itérations (défaut=10)
-        random_state: Reproductibilité
+        dataset_name: Nom du dataset (doit correspondre à vos dossiers)
     """
-    df = pd.read_csv(input_path)
+    # Chargement des données imputées
+    input_path = f"data/processed/{dataset_name}/{dataset_name}_knn_train.csv"
+    df_train = pd.read_csv(input_path)
     
-    imputer = IterativeImputer(
-        max_iter=max_iter,
-        random_state=random_state,
-        sample_posterior=True
+    # SMOTE (uniquement sur le train)
+    X_res, y_res = SMOTE(random_state=42).fit_resample(
+        df_train.drop(columns=['target']),
+        df_train['target']
     )
-    df_imputed = pd.DataFrame(imputer.fit_transform(df), columns=df.columns)
     
-    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    df_imputed.to_csv(output_path, index=False)
-    print(f" Données imputées (MICE) sauvegardées dans {output_path}")
+    # Sauvegarde
+    output_path = f"data/processed/{dataset_name}/{dataset_name}_knn_smote_train.csv"
+    pd.concat([X_res, y_res], axis=1).to_csv(output_path, index=False)
+    
+    # Copie du test non modifié (important!)
+    test_path = f"data/processed/{dataset_name}/{dataset_name}_knn_test.csv"
+    pd.read_csv(test_path).to_csv(
+        f"data/processed/{dataset_name}/{dataset_name}_knn_smote_test.csv", 
+        index=False
+    )

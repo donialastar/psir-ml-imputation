@@ -1,27 +1,40 @@
-import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_predict
-from ..utils.metrics import calculate_metrics
+from sklearn.metrics import accuracy_score
+from ..utils.metrics import calculate_metrics, save_metrics  # Importation des fonctions de métriques
+import pandas as pd
+from pathlib import Path
 
-def train_rf(data_path, target_col, n_estimators=100, cv=5):
+def train_rf(dataset_name, imputation_method='knn'):
     """
-    Entraînement Random Forest avec validation croisée
-    
+    Entraîne un modèle Random Forest sur les données imputées
     Args:
-        data_path: Chemin vers les données imputées
-        target_col: Nom de la colonne cible
-        n_estimators: Nombre d'arbres (défaut=100)
-        cv: Nombre de folds (défaut=5)
+        dataset_name: 'donia', 'gad'...
+        imputation_method: 'knn' ou 'mice'
     """
-    df = pd.read_csv(data_path)
-    X = df.drop(columns=[target_col])
-    y = df[target_col]
+    # Chargement des données imputées et SMOTE
+    train_path = f"data/processed/{dataset_name}/{dataset_name}_{imputation_method}_smote_train.csv"
+    test_path = f"data/processed/{dataset_name}/{dataset_name}_{imputation_method}_test.csv"
     
-    model = RandomForestClassifier(
-        n_estimators=n_estimators,
-        random_state=42,
-        class_weight='balanced'
-    )
+    train = pd.read_csv(train_path)
+    test = pd.read_csv(test_path)
     
-    y_pred = cross_val_predict(model, X, y, cv=cv)
-    return calculate_metrics(y, y_pred)
+    # Séparation des features et de la cible
+    X_train, y_train = train.drop(columns=['target']), train['target']
+    X_test, y_test = test.drop(columns=['target']), test['target']
+    
+    # Entraînement du modèle Random Forest
+    model = RandomForestClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    
+    # Prédictions
+    y_pred = model.predict(X_test)
+    
+    # Calcul des métriques
+    metrics = calculate_metrics(y_test, y_pred)
+    
+    # Sauvegarde des résultats
+    output_dir = f"results/tables/{dataset_name}/"
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    
+    # Sauvegarde des métriques dans un fichier CSV
+    save_metrics(metrics, f"{output_dir}/{dataset_name}_rf_{imputation_method}_metrics.csv")
