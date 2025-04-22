@@ -1,30 +1,17 @@
-from imblearn.over_sampling import SMOTE
 import pandas as pd
+from imblearn.over_sampling import SMOTE
 from pathlib import Path
 
-def apply_smote(dataset_name):
-    """
-    Applique SMOTE uniquement sur le train déjà imputé
-    Args:
-        dataset_name: Nom du dataset (doit correspondre à vos dossiers)
-    """
-    # Chargement des données imputées
-    input_path = f"data/processed/{dataset_name}/{dataset_name}_knn_train.csv"
-    df_train = pd.read_csv(input_path)
-    
-    # SMOTE (uniquement sur le train)
-    X_res, y_res = SMOTE(random_state=42).fit_resample(
-        df_train.drop(columns=['target']),
-        df_train['target']
-    )
-    
-    # Sauvegarde
-    output_path = f"data/processed/{dataset_name}/{dataset_name}_knn_smote_train.csv"
-    pd.concat([X_res, y_res], axis=1).to_csv(output_path, index=False)
-    
-    # Copie du test non modifié (important!)
-    test_path = f"data/processed/{dataset_name}/{dataset_name}_knn_test.csv"
-    pd.read_csv(test_path).to_csv(
-        f"data/processed/{dataset_name}/{dataset_name}_knn_smote_test.csv", 
-        index=False
-    )
+def apply_smote(dataset_name, input_suffix='knn'):
+    train = pd.read_csv(f"data/processed/{dataset_name}/{dataset_name}_{input_suffix}_train.csv")
+    X = train.drop(columns=['target'])
+    y = train['target']
+
+    smote = SMOTE(random_state=42)
+    X_resampled, y_resampled = smote.fit_resample(X, y)
+
+    output_dir = f"data/processed/{dataset_name}/"
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+    pd.concat([pd.DataFrame(X_resampled, columns=X.columns), pd.Series(y_resampled, name='target')], axis=1) \
+        .to_csv(f"{output_dir}/{dataset_name}_{input_suffix}_smote_train.csv", index=False)
