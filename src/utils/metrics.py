@@ -1,34 +1,32 @@
-from sklearn.ensemble import RandomForestClassifier
-from src.utils.metrics import calculate_metrics
+import pandas as pd
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score
+)
 
-def train_rf(dataset_name, imputation_method='knn'):
+def calculate_metrics(y_true, y_pred):
     """
-    Entraîne un modèle Random Forest sur les données imputées.
+    Calcule les métriques de base pour un problème de classification binaire.
+
     Args:
-        dataset_name: 'donia', 'gad'...
-        imputation_method: 'knn' ou 'mice'
+        y_true: vraies étiquettes
+        y_pred: étiquettes prédites
+
+    Returns:
+        DataFrame pandas avec : accuracy, precision, recall, f1_score
     """
-    # Chargement des données
-    train_path = f"data/processed/{dataset_name}/{dataset_name}_{imputation_method}_smote_train.csv"
-    test_path = f"data/processed/{dataset_name}/{dataset_name}_{imputation_method}_test.csv"
-    train = pd.read_csv(train_path)
-    test = pd.read_csv(test_path)
-    
-    # Préparation
-    X_train, y_train = train.drop(columns=['target']), train['target']
-    X_test, y_test = test.drop(columns=['target']), test['target']
-    
-    # Entraînement du modèle Random Forest
-    rf_model = RandomForestClassifier(random_state=42)
-    rf_model.fit(X_train, y_train)
-    
-    # Prédictions sur le jeu de test
-    y_pred = rf_model.predict(X_test)
-    
-    # Calcul des métriques
-    metrics = calculate_metrics(y_test, y_pred)
-    
-    # Sauvegarde des résultats
-    output_dir = f"results/tables/{dataset_name}/"
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    metrics.to_csv(f"{output_dir}/{dataset_name}_rf_{imputation_method}_metrics.csv", index=False)
+    acc = accuracy_score(y_true, y_pred)
+    prec = precision_score(y_true, y_pred, zero_division=0)
+    rec = recall_score(y_true, y_pred, zero_division=0)
+    f1 = f1_score(y_true, y_pred, zero_division=0)
+
+    metrics_dict = {
+        "accuracy": [acc],
+        "precision": [prec],
+        "recall": [rec],
+        "f1_score": [f1]
+    }
+
+    return pd.DataFrame(metrics_dict)
