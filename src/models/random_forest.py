@@ -37,5 +37,5 @@ def train_rf(dataset_name, imputation_method='knn'):
                    index=False)
 
     # ---------- renvoi ----------
-    return metrics            # ← on retourne le DataFrame
+    return metrics, model            # ← on retourne le DataFrame
 

@@ -1,67 +1,55 @@
 """
 train_pipeline.py
 ─────────────────
-Crée un pipeline complet
-(imputation KNN  → scaling  → Random Forest),
-l’entraîne sur le dataset HTA
-et l’enregistre dans models/pipeline_htn.joblib
+Appelle les modules d'imputation, d'entraînement et d’évaluation 
+pour entraîner un pipeline complet et l’enregistrer.
 """
 
 from pathlib import Path
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.impute import KNNImputer
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
 import joblib
+import pandas as pd
+
+# Appels aux fonctions personnalisées
+from imputation.knn import knn_impute
+from models.random_forest import train_rf
 
 # ────────────────────────────────────────────────
-# 1. Chargement  du jeu de données complet
+# 1. Paramètres du dataset et préparation
 # ────────────────────────────────────────────────
-data_path = "C:/Users/bamoi/OneDrive - Groupe ESAIP/$ PSIR/experimentation/repo/psir-ml-imputation/data/raw/data farouk/merged/variables lisibles/hta_nhanes_complet_variables_fr.csv"
-df = pd.read_csv(data_path)
+DATASET_NAME = "hta_nhanes_complet_variables_fr"
+RAW_DATA_PATH = Path("C:/Users/bamoi/OneDrive - Groupe ESAIP/$ PSIR/experimentation/repo/psir-ml-imputation/data/raw/data farouk/merged/variables lisibles") / f"{DATASET_NAME}.csv"
+PROCESSED_PATH = Path(f"data/processed/{DATASET_NAME}")
+MODEL_PATH = Path("src/models")
+MODEL_PATH.mkdir(parents=True, exist_ok=True)
 
-# Séparation cible / features
-y = df["HTA"]
-X = df.drop(columns=["HTA"])
+# Sauvegarde brute si pas encore splittée
+df = pd.read_csv(RAW_DATA_PATH)
+if not (Path(f"data/splits/{DATASET_NAME}/{DATASET_NAME}_train.csv").exists()):
+    from sklearn.model_selection import train_test_split
+    train, test = train_test_split(df, test_size=0.2, stratify=df["HTA"], random_state=42)
 
-# Garder uniquement les colonnes numériques (le KNNImputer les gère bien)
-num_cols = X.select_dtypes(include=["int64", "float64"]).columns.tolist()
-X_num = X[num_cols]
-
-# Train / test split pour contrôle (80 % / 20 %)
-X_train, X_test, y_train, y_test = train_test_split(
-    X_num, y, test_size=0.2, stratify=y, random_state=42
-)
-
-# ────────────────────────────────────────────────
-# 2. Construction du pipeline
-# ────────────────────────────────────────────────
-pipe = Pipeline([
-    ("imputer", KNNImputer(n_neighbors=5)),
-    ("scaler",  StandardScaler()),
-    ("clf",     RandomForestClassifier(
-                    n_estimators=100,
-                    random_state=42,
-                    n_jobs=-1))
-])
+    split_dir = Path(f"data/splits/{DATASET_NAME}")
+    split_dir.mkdir(parents=True, exist_ok=True)
+    train.to_csv(split_dir / f"{DATASET_NAME}_train.csv", index=False)
+    test.to_csv(split_dir / f"{DATASET_NAME}_test.csv", index=False)
 
 # ────────────────────────────────────────────────
-# 3. Entraînement
+# 2. Imputation (KNN)
 # ────────────────────────────────────────────────
-pipe.fit(X_train, y_train)
-
-# (facultatif) évaluation rapide sur le test set
-score = pipe.score(X_test, y_test)
-print(f"Accuracy rapide sur test : {score:.3f}")
+print("Imputation KNN...")
+knn_impute(DATASET_NAME, PROCESSED_PATH)
 
 # ────────────────────────────────────────────────
-# 4. Sauvegarde du pipeline
+# 3. Entraînement du modèle Random Forest
 # ────────────────────────────────────────────────
-ROOT = Path(__file__).resolve().parent.parent   # racine du dépôt
-MODEL_DIR = ROOT / "src/models"
-MODEL_DIR.mkdir(exist_ok=True)
+print("Entraînement du modèle Random Forest...")
+metrics_df = train_rf(DATASET_NAME, imputation_method="knn")
 
-joblib.dump(pipe, MODEL_DIR / "pipeline_htn.joblib")
-print(f"enregistré dans {MODEL_DIR / 'pipeline_htn.joblib'}")
+# ────────────────────────────────────────────────
+# 4. Export du modèle entraîné final
+# ────────────────────────────────────────────────
+metrics_df, model = train_rf(DATASET_NAME, imputation_method="knn")
+
+# Enregistrement
+joblib.dump(model, MODEL_PATH / "pipeline_htn.joblib")
+print(f"Modèle final enregistré dans {MODEL_PATH / 'pipeline_htn.joblib'}")
