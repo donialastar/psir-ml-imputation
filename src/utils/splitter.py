@@ -31,7 +31,7 @@ def split_dataset(dataset_name, target_column="HTA", test_size=0.2, random_state
     """
 
     # Charger le fichier CSV depuis le dossier brut
-    raw_path = Path(f"C:/Users/bamoi/OneDrive - Groupe ESAIP/$ PSIR/experimentation/repo/psir-ml-imputation/data/raw/{dataset_name}.csv")
+    raw_path = Path(f"data/raw/{dataset_name}.csv")
     if not raw_path.exists():
         raise FileNotFoundError(f"Dataset introuvable : {raw_path}")
 
