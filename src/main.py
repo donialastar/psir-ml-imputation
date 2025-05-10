@@ -39,10 +39,10 @@ datasets = [
         "file": "Hypertension-risk-model-main",
         "target": "Risk"
     },
-    #{
-    #    "file": "heart_disease",
-    #    "target": "High Blood Pressure"
-    #},
+    {
+        "file": "heart_disease",
+        "target": "High Blood Pressure"
+    },
     #{
     #    "file": "ADMISSIONS",
     #    "target": "HTA"

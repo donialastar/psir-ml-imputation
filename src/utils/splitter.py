@@ -44,12 +44,14 @@ def split_dataset(dataset_name, target_column="HTA", test_size=0.2, random_state
     # Vérifier que la colonne cible existe
     if target_column not in df.columns:
         raise ValueError(f"Colonne cible '{target_column}' absente du dataset.")
+    
+    # Remplacer les chaînes 'nan' littérales par des vrais NaN
+    df[target_column] = df[target_column].replace('nan', pd.NA)
 
-    # Nettoyage / conversion de la colonne cible
-    if df[target_column].dtype == 'object':
-        # Mapping texte vers binaire
-        df[target_column] = df[target_column].str.strip().str.lower().map({
-            'Yes': 1, 'No': 0,
+    # Si c’est une colonne texte, convertir proprement
+    if df[target_column].dtype == 'object' or df[target_column].dtype == 'string':
+        df[target_column] = df[target_column].astype(str).str.strip().str.lower().map({
+            'yes': 1, 'no': 0,
             'true': 1, 'false': 0,
             '1': 1, '0': 0
         })
@@ -61,9 +63,14 @@ def split_dataset(dataset_name, target_column="HTA", test_size=0.2, random_state
             print(f"Colonne '{target_column}' détectée comme continue, conversion binaire avec seuil ≥140")
             df[target_column] = df[target_column].apply(lambda x: 1 if x >= 140 else 0)
 
-    # Vérifier s'il reste des valeurs invalides
+    # Si après mapping c’est toujours du texte ou avec NaN, convertir le reste manuellement
     if df[target_column].isna().any():
-        raise ValueError(f"Certaines valeurs de la colonne cible '{target_column}' sont invalides ou manquantes après conversion.")
+        # Essayer conversion directe en entier
+        try:
+            df[target_column] = df[target_column].astype(float)
+        except:
+            print("Valeurs non convertibles :", df[target_column].unique())
+            raise ValueError(f"Certaines valeurs de la colonne cible '{target_column}' sont invalides ou manquantes après conversion.")
 
     # Supprimer les lignes avec valeur cible manquante
     initial_len = len(df)
