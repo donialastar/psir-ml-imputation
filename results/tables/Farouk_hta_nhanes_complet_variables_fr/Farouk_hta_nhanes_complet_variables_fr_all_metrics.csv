@@ -1,0 +1,10 @@
+Imputation,Modèle,Accuracy,Recall,Precision,F1-score
+knn,random_forest,0.9936,0.9988,0.978,0.9883
+knn,dnn,0.9833,0.9585,0.9794,0.9689
+knn,gradient_boost,0.9942,0.9976,0.9814,0.9894
+mice,random_forest,0.9994,1.0,0.9976,0.9988
+mice,dnn,0.9949,0.9882,0.9929,0.9905
+mice,gradient_boost,1.0,1.0,1.0,1.0
+median,random_forest,1.0,1.0,1.0,1.0
+median,dnn,0.9939,0.9882,0.9893,0.9887
+median,gradient_boost,1.0,1.0,1.0,1.0
