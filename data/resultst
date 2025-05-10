@@ -1,0 +1,39 @@
+import pandas as pd
+from pathlib import Path
+import glob
+
+# Dossier racine des résultats individuels
+results_root = Path("data/results")
+
+# Liste pour stocker toutes les lignes du tableau final
+all_metrics = []
+
+# Recherche de tous les fichiers *_metrics.csv dans les sous-dossiers de results
+for metrics_file in glob.glob("data/results//_metrics.csv"):
+    # Exemple de nom : data/results/nhanes/nhanes_dnn_knn_metrics.csv
+    filename = Path(metrics_file).stem  # nhanes_dnn_knn_metrics
+    parts = filename.split("_")
+
+    if len(parts) < 4:
+        continue  # sécurité en cas de format incorrect
+
+    dataset = parts[0]
+    model = parts[1].upper()
+    imputation = parts[2].lower()
+
+    # Chargement des métriques
+    df = pd.read_csv(metrics_file)
+    df.insert(0, "Dataset", dataset)
+    df.insert(1, "Model", model)
+    df.insert(2, "Imputation", imputation)
+
+    all_metrics.append(df)
+
+# Concaténation de toutes les métriques en un seul DataFrame
+final_df = pd.concat(all_metrics, ignore_index=True)
+
+# Sauvegarde dans un fichier CSV
+output_path = results_root / "all_metrics.csv"
+final_df.to_csv(output_path, index=False)
+
+print(f"\n Fichier global des métriques généré : {output_path}")
