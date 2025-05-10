@@ -1,7 +1,0 @@
-Imputation,Modèle,Accuracy,Recall,Specificity,F1-score,AUC-ROC
-KNN,Random Forest,0.9987,1.0,0.9982,0.9976,1.0
-KNN,MLP,0.8348,0.4739,0.9691,0.6088,0.9243
-MICE,Random Forest,1.0,1.0,1.0,1.0,1.0
-MICE,MLP,0.7416,0.9751,0.6548,0.6718,0.8797
-SMOTE,Random Forest,1.0,1.0,1.0,1.0,1.0
-SMOTE,MLP,0.6867,0.9941,0.5723,0.6325,0.8461

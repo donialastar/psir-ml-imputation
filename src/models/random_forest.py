@@ -1,41 +1,32 @@
-import pandas as pd
+"""
+random_forest.py
+────────────────
+Contient une fonction pour entraîner un modèle Random Forest 
+à partir de X_train et y_train. Ne lit pas de fichier, ne fait 
+pas d’évaluation, ne sauvegarde rien.
+
+➡️ Utilisé par main.py
+"""
+
 from sklearn.ensemble import RandomForestClassifier
-from utils.metrics import calculate_metrics
-from pathlib import Path
 
-def train_rf(dataset_name, imputation_method='knn'):
+def train_rf(X_train, y_train):
     """
-    Entraîne un modèle Random Forest à partir des données imputées + SMOTE.
+    Entraîne un modèle Random Forest.
 
-    Args:
-        dataset_name: nom du dataset (ex: "gad")
-        imputation_method: méthode utilisée pour l'imputation ('knn', 'mice'...)
+    Paramètres :
+        X_train : DataFrame des variables explicatives
+        y_train : Series ou array des labels
+
+    Retourne :
+        Un modèle RandomForestClassifier entraîné
     """
-    # Chargement des données
-    train = pd.read_csv(f"data/processed/{dataset_name}/{dataset_name}_{imputation_method}_imputed_train.csv")
-    test = pd.read_csv(f"data/processed/{dataset_name}/{dataset_name}_{imputation_method}_imputed_test.csv")
-
-    X_train, y_train = train.drop(columns=['HTA']), train['HTA']
-    X_test, y_test = test.drop(columns=['HTA']), test['HTA']
-
-    # Modèle
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_train, y_train)
-
-    y_pred = model.predict(X_test)
+    model = RandomForestClassifier(
+        n_estimators=100,
+        random_state=42,
+        n_jobs=-1
+    )
     
-    y_proba = model.predict_proba(X_test)[:, 1]   # proba d’être dans la classe 1
-
-
-    # Évaluation
-    metrics = calculate_metrics(y_test, y_pred,"random forest", "knn",y_proba)
-
-    # ---------- sauvegarde ----------
-    out_dir = Path(f"results/tables/{dataset_name}")
-    out_dir.mkdir(parents=True, exist_ok=True)
-    metrics.to_csv(out_dir / f"{dataset_name}_rf_{imputation_method}_metrics.csv",
-                   index=False)
-
-    # ---------- renvoi ----------
-    return metrics, model            # ← on retourne le DataFrame
-
+    model.fit(X_train, y_train)
+    
+    return model

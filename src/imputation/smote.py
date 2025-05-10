@@ -1,35 +1,47 @@
+"""
+smote.py
+────────
+Applique SMOTE (Synthetic Minority Over-sampling Technique)
+pour équilibrer les classes dans un jeu de données.
+
+Utilisé après imputation, avant entraînement.
+Appliqué uniquement si la variable cible est binaire.
+"""
+
 from imblearn.over_sampling import SMOTE
 import pandas as pd
-from pathlib import Path
 
-def apply_smote(dataset_name, input_suffix='knn'):
+def apply_smote(X, y, random_state=42):
     """
-    Applique SMOTE sur les données d'entraînement avant imputation.
-    Args:
-        dataset_name: Nom du dataset (ex: 'gad')
-        input_suffix: Suffixe pour déterminer si on applique sur KNN ou MICE (ex: 'knn')
-    """
-    # Chargement des données d'entraînement (avant l'imputation)
-    train_path = f"data/splits/{dataset_name}/{dataset_name}_train.csv"
-    test_path = f"data/splits/{dataset_name}/{dataset_name}_test.csv"
-    train = pd.read_csv(train_path)
-    test = pd.read_csv(test_path)
+    Applique SMOTE uniquement si la cible est binaire.
 
-    # Séparer les features et la target
-    X_train, y_train = train.drop(columns=['target']), train['target']
-    X_test, y_test = test.drop(columns=['target']), test['target']
-    
-    # Appliquer SMOTE sur l'entraînement pour équilibrer les classes
-    smote = SMOTE(random_state=42)
-    X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
-    
-    # Sauvegarde des données après SMOTE
-    output_dir = f"data/processed/{dataset_name}/"
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    
-    pd.concat([X_train_smote, y_train_smote], axis=1).to_csv(
-        f"{output_dir}/{dataset_name}_{input_suffix}_smote_train.csv", index=False
-    )
-    pd.concat([X_test, y_test], axis=1).to_csv(
-        f"{output_dir}/{dataset_name}_{input_suffix}_smote_test.csv", index=False
-    )
+    Paramètres :
+        X : DataFrame ou array
+            Features (déjà imputées et encodées)
+        y : Series ou array
+            Cible binaire
+        random_state : int
+            Graine aléatoire (par défaut 42)
+
+    Retourne :
+        (X_resampled, y_resampled)
+    """
+    # Vérifie que la cible est bien binaire
+    if isinstance(y, pd.Series):
+        unique_vals = y.dropna().unique()
+    else:
+        y = pd.Series(y)
+        unique_vals = y.dropna().unique()
+
+    if len(unique_vals) != 2:
+        print("SMOTE ignoré : la cible n'est pas binaire.")
+        return X, y
+
+    smote = SMOTE(random_state=random_state)
+    X_resampled, y_resampled = smote.fit_resample(X, y)
+
+    #Protection : reconvertir X en DataFrame si c'était un DataFrame
+    if isinstance(X, pd.DataFrame):
+        X_resampled = pd.DataFrame(X_resampled, columns=X.columns)
+
+    return X_resampled, y_resampled
