@@ -25,7 +25,7 @@ from imputation.mice import mice_impute
 from imputation.median import median_impute
 from models.random_forest import train_rf
 from models.dnn import train_dnn
-from models.grandient_boost import train_gb
+#from models.grandient_boost import train_gb
 from utils.metrics import calculate_metrics
 from utils.visualizations import generate_all_plots
 
@@ -54,7 +54,7 @@ imputation_methods = ["knn", "mice", "median"]
 model_functions = {
     "random_forest": train_rf,
     "dnn": train_dnn,
-    "gradient_boost": train_gb
+    #"gradient_boost": train_gb
 }
 
 global_results = []
@@ -186,6 +186,12 @@ for dataset_config in datasets:
                 nom_modele=model_name,
                 nom_imputation=imputation_method
             )
+            scenario_counter = 1
+            result_df["Scenario ID"] = f"S{scenario_counter}"
+            scenario_counter += 1
+            
+            result_df["Dataset"] = DATASET_NAME
+            
             dataset_results.append(result_df)
 
             # ─── Sauvegarde du modèle ───
@@ -234,5 +240,23 @@ if global_results:
     global_csv_path.parent.mkdir(parents=True, exist_ok=True)
     report_df.to_csv(global_csv_path, index=False)
     print(f"Résumé global enregistré : {global_csv_path}")
+    
+    # === GÉNÉRATION DES 16 GRAPHIQUES FINAUX ===
+    summary_df = pd.read_csv("results/all_datasets_metrics.csv")
+    summary_df.columns = summary_df.columns.str.strip().str.lower()
+
+    if "nom_dataset" in summary_df.columns:
+        summary_df.rename(columns={"nom_dataset": "dataset"}, inplace=True)
+    if "modèle" in summary_df.columns:
+        summary_df.rename(columns={"modèle": "modèle"}, inplace=True)
+    if "imputation method" in summary_df.columns:
+        summary_df.rename(columns={"imputation method": "imputation"}, inplace=True)
+
+    from utils.visualizations import plot_metric_by_dataset
+    metrics_to_plot = ["accuracy", "recall", "precision", "f1-score"]
+    for metric in metrics_to_plot:
+        plot_metric_by_dataset(summary_df, metric, output_dir="results/summary_plots")
 
 print("\nPipeline terminé avec succès pour tous les datasets !")
+
+
