@@ -59,6 +59,8 @@ model_functions = {
 
 global_results = []
 
+scenario_counter = 1
+
 # ─── Pipeline principal par dataset ───────────────
 for dataset_config in datasets:
     DATASET_NAME = dataset_config["file"]
@@ -80,6 +82,7 @@ for dataset_config in datasets:
         split_dataset(DATASET_NAME, target_column=target_col)
     else:
         print(f"Split déjà effectué pour {DATASET_NAME}")
+
 
     dataset_results = []
 
@@ -163,6 +166,7 @@ for dataset_config in datasets:
         else:
             print("SMOTE non appliqué (la cible n’est pas binaire)")
 
+        
         # ─── Étape 6 : boucle sur les modèles à entraîner ───
         for model_name, model_func in model_functions.items():
             print(f"\nEntraînement : {model_name.upper()} sur {imputation_method.upper()}")
@@ -186,11 +190,16 @@ for dataset_config in datasets:
                 nom_modele=model_name,
                 nom_imputation=imputation_method
             )
-            scenario_counter = 1
-            result_df["Scenario ID"] = f"S{scenario_counter}"
-            scenario_counter += 1
             
+            result_df["Scenario ID"] = f"S{scenario_counter}"
             result_df["Dataset"] = DATASET_NAME
+            scenario_counter += 1
+
+            # Réorganiser les colonnes pour que Scenario ID et Dataset soient devant
+            cols = result_df.columns.tolist()
+            if "Scenario ID" in cols and "Dataset" in cols:
+                cols = ["Scenario ID", "Dataset"] + [col for col in cols if col not in ["Scenario ID", "Dataset"]]
+                result_df = result_df[cols]
             
             dataset_results.append(result_df)
 
@@ -210,24 +219,26 @@ for dataset_config in datasets:
 
             print(f"Modèle enregistré : {model_dir / 'pipeline.joblib'}")
 
-        # ─── Étape 7 : compilation des résultats pour le dataset ───
-        if dataset_results:
-            final_df = pd.concat(dataset_results, ignore_index=True)
-            global_results.append(final_df)
+    # ─── Étape 7 : compilation des résultats pour le dataset ───
+    if dataset_results:
+        final_df = pd.concat(dataset_results, ignore_index=True)
 
-            # Sauvegarde des métriques au format CSV
-            metrics_path = RESULTS_DIR / f"{DATASET_NAME}_all_metrics.csv"
-            final_df.to_csv(metrics_path, index=False)
-            print(f"Résultats enregistrés : {metrics_path}")
+        # Supprimer les doublons par Dataset + Modèle + Imputation
+        final_df = final_df.drop_duplicates(subset=["Dataset", "Modèle", "Imputation"])
 
-            # ─── Étape 8 : visualisations automatiques ───
-            try:
-                generate_all_plots(final_df, output_dir=RESULTS_DIR)
-                print(f"Graphiques générés dans : {RESULTS_DIR}")
-            except Exception as e:
-                print(f"Erreur de visualisation : {e}")
-        else:
-            print(f"Aucun résultat enregistré pour le dataset : {DATASET_NAME}")
+        global_results.append(final_df)
+
+        # Sauvegarde propre par dataset
+        metrics_path = RESULTS_DIR / f"{DATASET_NAME}_all_metrics.csv"
+        final_df.to_csv(metrics_path, index=False)
+        print(f"Résultats enregistrés : {metrics_path}")
+
+        # Visualisations Plotly
+        try:
+            generate_all_plots(final_df, output_dir=RESULTS_DIR)
+            print(f"Graphiques générés dans : {RESULTS_DIR}")
+        except Exception as e:
+            print(f"Erreur de visualisation : {e}")
 
 # ───────────────────────────────────────────────
 # 6. SYNTHÈSE GLOBALE MULTI-DATASETS (facultatif)

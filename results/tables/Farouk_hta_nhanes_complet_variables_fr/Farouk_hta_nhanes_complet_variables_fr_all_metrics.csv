@@ -1,7 +1,7 @@
-Imputation,Modèle,Accuracy,Recall,Precision,F1-score,Scenario ID,Dataset
-knn,random_forest,0.9936,0.9988,0.978,0.9883,S1,Farouk_hta_nhanes_complet_variables_fr
-knn,dnn,0.9843,0.9763,0.966,0.9711,S1,Farouk_hta_nhanes_complet_variables_fr
-mice,random_forest,0.9994,1.0,0.9976,0.9988,S1,Farouk_hta_nhanes_complet_variables_fr
-mice,dnn,0.9936,0.9893,0.987,0.9882,S1,Farouk_hta_nhanes_complet_variables_fr
-median,random_forest,1.0,1.0,1.0,1.0,S1,Farouk_hta_nhanes_complet_variables_fr
-median,dnn,0.9929,0.9917,0.9824,0.987,S1,Farouk_hta_nhanes_complet_variables_fr
+Scenario ID,Dataset,Imputation,Modèle,Accuracy,Recall,Precision,F1-score
+S1,Farouk_hta_nhanes_complet_variables_fr,knn,random_forest,0.9936,0.9988,0.978,0.9883
+S2,Farouk_hta_nhanes_complet_variables_fr,knn,dnn,0.9839,0.9621,0.9783,0.9701
+S3,Farouk_hta_nhanes_complet_variables_fr,mice,random_forest,0.9994,1.0,0.9976,0.9988
+S4,Farouk_hta_nhanes_complet_variables_fr,mice,dnn,0.9942,0.9905,0.9882,0.9893
+S5,Farouk_hta_nhanes_complet_variables_fr,median,random_forest,1.0,1.0,1.0,1.0
+S6,Farouk_hta_nhanes_complet_variables_fr,median,dnn,0.9945,0.9834,0.9964,0.9899
