@@ -43,10 +43,10 @@ datasets = [
         "file": "heart_disease",
         "target": "High Blood Pressure"
     },
-    #{
-    #    "file": "ADMISSIONS",
-    #    "target": "HTA"
-    #}
+    {
+        "file": "Blood_Pressure_Data_for_disease_Prediction",
+        "target": "Blood_Pressure_Abnormality"
+    }
 ]
 
 imputation_methods = ["knn", "mice", "median"]
