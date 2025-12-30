@@ -34,7 +34,23 @@ pip install -r requirements.txt
 jupyter lab
 # run notebooks/01_preprocessing.ipynb → 02 → 03 → 04
 ```
-Tree: `├── data/{raw,processed} ├── notebooks/ ├── outputs/{tables,figures} ├── src/{imputers,metrics,viz}.py └── README.md`  
-BibTeX:  
-`@techreport{PARE1_2025_IR8, title={Preventive Detection of Chronic Diseases with Artificial Intelligence}, author={Bamoin, Toure Farouk and Mengué M'Ella, Colette and Mbango Biang, Donia and Nguette Fane, Gad and Yackounda Mougoula, Belle and Letard, Alexandre}, institution={CERADE, ESAIP & LERIA, Université d'Angers}, number={PARE1-2025-IR n°8}, year={2025}}`  
-Authors (equal contribution) & Licence: Bamoin Toure Farouk, Mengué M’Ella Colette, Mbango Biang Donia, Nguette Fane Gad, Yackounda Mougoula Belle, Prof. Alexandre Letard — MIT © 2025 CERADE & LERIA
+Tree :
+```
+├── data/{raw,processed}
+├── notebooks/
+├── outputs/{tables,figures}
+├── src/{imputers,metrics,viz}.py
+└── README.md
+```
+BibTeX :
+```
+@techreport{PARE1_2025_IR8,
+  title={Preventive Detection of Chronic Diseases with Artificial Intelligence},
+  author={Bamoin, Toure Farouk and Mengué M'Ella, Colette and Mbango Biang, Donia and Nguette Fane, Gad and Yackounda Mougoula, Belle and Letard, Alexandre},
+  institution={CERADE, ESAIP & LERIA, Université d'Angers},
+  number={PARE1-2025-IR n°8},
+  year={2025}
+}
+```
+Authors (equal contribution) & Licence :  
+Bamoin Toure Farouk, Mengué M’Ella Colette, Mbango Biang Donia, Nguette Fane Gad, Yackounda Mougoula Belle, Prof. Alexandre Letard — MIT © 2025 CERADE & LERIA
