@@ -1,38 +1,24 @@
-"""
-dnn.py
-──────
-Contient une fonction pour entraîner un modèle Deep Neural Network 
-(DNN) à partir de X_train et y_train, avec preprocessing local 
-(scaling).
-
-➡️ Ne lit pas les fichiers, ne fait pas d’évaluation, ne sauvegarde rien.
-"""
-
+import pandas as pd
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from sklearn.preprocessing import StandardScaler
+from ..utils.metrics import calculate_metrics, save_metrics
+from pathlib import Path
 
-def train_dnn(X_train, y_train):
-    from tensorflow.keras import backend as K
-    K.clear_session()
-    """
-    Entraîne un réseau de neurones dense.
+def train_dnn(dataset_name, imputation_method='knn'):
+    train = pd.read_csv(f"data/processed/{dataset_name}/{dataset_name}_{imputation_method}_smote_train.csv")
+    test = pd.read_csv(f"data/processed/{dataset_name}/{dataset_name}_{imputation_method}_test.csv")
 
-    Paramètres :
-        X_train : DataFrame des variables explicatives
-        y_train : Series ou array des labels
+    X_train, y_train = train.drop(columns=['target']), train['target']
+    X_test, y_test = test.drop(columns=['target']), test['target']
 
-    Retourne :
-        Un modèle Keras entraîné
-    """
-    # Normalisation des features
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X_train)
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
-    # Définition du modèle
     model = Sequential([
-        Dense(128, activation='relu', input_shape=(X_scaled.shape[1],)),
+        Dense(128, activation='relu', input_shape=(X_train.shape[1],)),
         Dropout(0.3),
         Dense(64, activation='relu'),
         Dropout(0.2),
@@ -40,9 +26,8 @@ def train_dnn(X_train, y_train):
     ])
 
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.fit(X_train_scaled, y_train, epochs=50, batch_size=32, validation_split=0.2, verbose=0)
 
-    # Entraînement
-    model.fit(X_scaled, y_train, epochs=50, batch_size=32, validation_split=0.2, verbose=0)
-
-    # On retourne à la fois le modèle et le scaler, utile pour prédictions
-    return (model, scaler)
+    y_pred = (model.predict(X_test_scaled) > 0.5).astype(int).flatten()
+    metrics = calculate_metrics(y_test, y_pred)
+    save_metrics(metrics, f"results/tables/{dataset_name}/{dataset_name}_dnn_{imputation_method}_metrics.csv")
