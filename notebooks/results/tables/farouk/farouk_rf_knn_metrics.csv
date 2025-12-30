@@ -1,0 +1,2 @@
+Imputation,Modèle,Accuracy,Recall,Specificity,Precision,F1-score,AUC-ROC
+knn,random forest,0.9945,0.9976,0.9934,0.9825,0.99,0.9995

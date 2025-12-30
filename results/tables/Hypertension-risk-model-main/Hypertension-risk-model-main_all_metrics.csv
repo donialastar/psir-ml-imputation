@@ -1,0 +1,7 @@
+Scenario ID,Dataset,Imputation,Modèle,Accuracy,Recall,Precision,F1-score
+S7,Hypertension-risk-model-main,knn,random_forest,0.8974,0.8897,0.8014,0.8432
+S8,Hypertension-risk-model-main,knn,dnn,0.875,0.8441,0.7735,0.8073
+S9,Hypertension-risk-model-main,mice,random_forest,0.8927,0.8821,0.7945,0.836
+S10,Hypertension-risk-model-main,mice,dnn,0.8903,0.8441,0.8102,0.8268
+S11,Hypertension-risk-model-main,median,random_forest,0.8892,0.8783,0.7884,0.8309
+S12,Hypertension-risk-model-main,median,dnn,0.8868,0.8593,0.793,0.8248

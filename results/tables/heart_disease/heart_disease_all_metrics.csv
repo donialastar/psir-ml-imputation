@@ -1,0 +1,7 @@
+Scenario ID,Dataset,Imputation,Modèle,Accuracy,Recall,Precision,F1-score
+S13,heart_disease,knn,random_forest,0.5278,0.4935,0.5339,0.5129
+S14,heart_disease,knn,dnn,0.4977,0.4826,0.5016,0.4919
+S15,heart_disease,mice,random_forest,0.5003,0.4826,0.5042,0.4931
+S16,heart_disease,mice,dnn,0.4882,0.4776,0.4918,0.4846
+S17,heart_disease,median,random_forest,0.4997,0.4866,0.5036,0.4949
+S18,heart_disease,median,dnn,0.4827,0.4836,0.4865,0.485

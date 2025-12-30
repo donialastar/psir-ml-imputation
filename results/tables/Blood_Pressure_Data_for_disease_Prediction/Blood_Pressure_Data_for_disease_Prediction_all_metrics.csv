@@ -1,0 +1,7 @@
+Scenario ID,Dataset,Imputation,Modèle,Accuracy,Recall,Precision,F1-score
+S19,Blood_Pressure_Data_for_disease_Prediction,knn,random_forest,0.88,0.868,0.886,0.8769
+S20,Blood_Pressure_Data_for_disease_Prediction,knn,dnn,0.875,0.8325,0.9061,0.8677
+S21,Blood_Pressure_Data_for_disease_Prediction,mice,random_forest,0.8725,0.8579,0.8802,0.8689
+S22,Blood_Pressure_Data_for_disease_Prediction,mice,dnn,0.8475,0.7817,0.8953,0.8347
+S23,Blood_Pressure_Data_for_disease_Prediction,median,random_forest,0.8725,0.8579,0.8802,0.8689
+S24,Blood_Pressure_Data_for_disease_Prediction,median,dnn,0.8475,0.797,0.882,0.8373
